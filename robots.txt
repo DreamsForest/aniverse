@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://example.com/sitemap.xml
+Sitemap: https://aniverse.muhinv451.workers.dev/sitemap.xml
