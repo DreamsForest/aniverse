@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ВАЖНО для SEO: замени https://example.com на свой реальный домен во всех тегах ниже -->
+  <title>AniVerse — смотреть аниме онлайн бесплатно в HD</title>
+  <meta name="description" content="AniVerse — каталог аниме: смотрите сериалы и фильмы онлайн бесплатно в хорошем качестве с озвучкой и субтитрами. Новинки 2026, топ популярных тайтлов." />
+  <meta name="keywords" content="аниме, смотреть аниме онлайн, аниме бесплатно, аниме 2026, аниме сериалы, аниме с озвучкой" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://example.com/" />
+  <meta name="theme-color" content="#07060f" />
+
+  <!-- Open Graph (превью в соцсетях/мессенджерах) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="AniVerse" />
+  <meta property="og:title" content="AniVerse — смотреть аниме онлайн бесплатно" />
+  <meta property="og:description" content="Каталог аниме в красивом дизайне: новинки 2026 и топ популярных. Онлайн, бесплатно, в HD." />
+  <meta property="og:url" content="https://example.com/" />
+  <meta property="og:image" content="https://example.com/og-cover.jpg" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="site.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://shikimori.io" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Schema.org: сайт + строка поиска -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "AniVerse",
+    "url": "https://example.com/",
+    "description": "Каталог аниме онлайн: новинки 2026 и топ популярных тайтлов.",
+    "inLanguage": "ru",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://example.com/#/catalog?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- Анимированный фон -->
+  <div class="aurora">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+
+  <!-- Шапка -->
+  <header class="header glass">
+    <a href="#/" class="logo">
+      <span class="logo-mark">◢◤</span>
+      <span class="logo-text">Ani<span>Verse</span></span>
+    </a>
+
+    <div class="search">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.49-1.5-5-5Zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14Z"/>
+      </svg>
+      <input id="searchInput" type="search" placeholder="Поиск аниме…" autocomplete="off" />
+    </div>
+
+    <nav class="nav">
+      <a href="#/" class="nav-link" data-nav="home">Главная</a>
+      <a href="#/catalog" class="nav-link" data-nav="catalog">Каталог</a>
+    </nav>
+  </header>
+
+  <!-- Контент рендерится сюда -->
+  <main id="app"></main>
+
+  <footer class="footer">
+    <p>AniVerse — демо-каталог аниме. Видео встраивается с внешних плееров.</p>
+    <p class="muted">Размещайте только тот контент, на который у вас есть права.</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

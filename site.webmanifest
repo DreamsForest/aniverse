@@ -1,0 +1,13 @@
+{
+  "name": "AniVerse — аниме онлайн",
+  "short_name": "AniVerse",
+  "description": "Каталог аниме онлайн: новинки 2026 и топ популярных.",
+  "lang": "ru",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07060f",
+  "theme_color": "#07060f",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

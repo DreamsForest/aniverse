@@ -1,0 +1,11 @@
+# OS
+Thumbs.db
+.DS_Store
+
+# Node (на случай если появятся зависимости)
+node_modules/
+npm-debug.log*
+
+# Редакторы
+.vscode/
+.idea/
