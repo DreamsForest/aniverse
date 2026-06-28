@@ -1,6 +1,6 @@
 {
-  "name": "AniVerse — аниме онлайн",
-  "short_name": "AniVerse",
+  "name": "AniToki — аниме онлайн",
+  "short_name": "AniToki",
   "description": "Каталог аниме онлайн: новинки 2026 и топ популярных.",
   "lang": "ru",
   "start_url": "/",
@@ -8,6 +8,8 @@
   "background_color": "#07060f",
   "theme_color": "#07060f",
   "icons": [
-    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "favicon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "favicon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }

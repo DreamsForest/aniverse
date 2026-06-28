@@ -69,16 +69,25 @@ function gridHTML(list) {
   return `<div class="grid">${list.map(cardHTML).join("")}</div>`;
 }
 
-// Сетка каталога с рекламой: нативная карточка ближе к началу + баннер-ряд
-// по центру (появляется при прокрутке большого каталога). Слоты скрыты,
-// пока ads.js не подгрузит в них рекламу.
+// Сетка каталога с рекламой: нативная карточка ближе к началу + рекламные
+// ряды-баннеры, повторяющиеся через каждые AD_EVERY карточек (чтобы при
+// прокрутке большого каталога реклама встречалась не один раз).
+// Слоты скрыты, пока ads.js не подгрузит в них рекламу.
+const AD_EVERY = 18; // рекламный ряд после каждых N карточек
 function catalogGridHTML(list) {
   if (!list.length) return gridHTML(list);
   const cards = list.map(cardHTML);
-  if (cards.length > 6) cards.splice(6, 0, `<div class="ad-card" data-ad="native"></div>`);
-  const mid = Math.min(28, Math.floor(cards.length / 2));
-  cards.splice(mid, 0, `<div class="ad-slot ad-row" data-ad="in-content"></div>`);
-  return `<div class="grid">${cards.join("")}</div>`;
+  const out = [];
+  cards.forEach((card, i) => {
+    out.push(card);
+    // после каждых AD_EVERY карточек (кроме самого конца сетки) — баннер-ряд
+    if ((i + 1) % AD_EVERY === 0 && i + 1 < cards.length) {
+      out.push(`<div class="ad-slot ad-row" data-ad="in-content"></div>`);
+    }
+  });
+  // нативная карточка ближе к началу сетки (первый рекламный ряд идёт позже)
+  if (out.length > 6) out.splice(6, 0, `<div class="ad-card" data-ad="native"></div>`);
+  return `<div class="grid">${out.join("")}</div>`;
 }
 
 /* Все жанры из каталога */

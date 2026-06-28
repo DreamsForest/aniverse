@@ -81,10 +81,10 @@ const cardHTML = (x, hrefBase) =>
 
 function pageHTML(a, all, KODIK_TOKEN, KODIK_API, landedGenres = new Set(), related = []) {
   const url = `${SITE}/anime/${a.id}/`;
-  const metaTitle = `${a.title}${a.original ? " (" + a.original + ")" : ""} — смотреть онлайн | AniVerse`;
+  const metaTitle = `${a.title}${a.original ? " (" + a.original + ")" : ""} — смотреть онлайн | AniToki`;
   const metaDesc =
     clip(a.description, 150) ||
-    `Смотрите аниме «${a.title}» онлайн бесплатно в хорошем качестве на AniVerse.`;
+    `Смотрите аниме «${a.title}» онлайн бесплатно в хорошем качестве на AniToki.`;
   const genres = (a.genres || []).join(", ");
 
   const ld = {
@@ -130,7 +130,10 @@ function pageHTML(a, all, KODIK_TOKEN, KODIK_API, landedGenres = new Set(), rela
 ${a.poster ? `<meta property="og:image" content="${esc(a.poster)}"/>` : ""}
 <meta property="og:locale" content="ru_RU"/>
 <meta name="twitter:card" content="summary_large_image"/>
+<link rel="icon" href="../../favicon.ico" sizes="48x48"/>
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml"/>
+<link rel="icon" href="../../favicon-192.png" type="image/png" sizes="192x192"/>
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://shikimori.io"/>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -140,7 +143,7 @@ ${a.poster ? `<meta property="og:image" content="${esc(a.poster)}"/>` : ""}
 <body>
 <div class="aurora"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
 <header class="header glass">
-  <a href="../../index.html" class="logo"><span class="logo-mark">◢◤</span><span class="logo-text">Ani<span>Verse</span></span></a>
+  <a href="../../index.html" class="logo"><span class="logo-mark">◢◤</span><span class="logo-text">Ani<span>Toki</span></span></a>
   <nav class="nav"><a href="../../index.html" class="nav-link">Главная</a><a href="../../index.html#/catalog" class="nav-link">Каталог</a></nav>
 </header>
 <main>
@@ -176,7 +179,7 @@ ${a.poster ? `<meta property="og:image" content="${esc(a.poster)}"/>` : ""}
   ${similar ? `<h2 class="section-title">Похожие аниме</h2><div class="grid">${similar}</div>` : ""}
 </main>
 <footer class="footer">
-  <p>AniVerse — каталог аниме онлайн. Видео предоставляет внешний плеер Kodik.</p>
+  <p>AniToki — каталог аниме онлайн. Видео предоставляет внешний плеер Kodik.</p>
 </footer>
 <script>
 (async function(){
@@ -216,7 +219,14 @@ function landingHTML({ path, h1, metaTitle, metaDesc, intro, items, related }) {
   const depth = path.split("/").filter(Boolean).length;
   const up = "../".repeat(depth);
   const url = `${SITE}/${path}/`;
-  const grid = items.map((x) => cardHTML(x, up + "anime/")).join("");
+  // Карточки + рекламные ряды через каждые 18 (чтобы в длинных подборках
+  // реклама встречалась не один раз при прокрутке). Слоты скрыты до филла.
+  const cells = [];
+  items.forEach((x, i) => {
+    cells.push(cardHTML(x, up + "anime/"));
+    if ((i + 1) % 18 === 0 && i + 1 < items.length) cells.push(`<div class="ad-slot ad-row" data-ad="in-content"></div>`);
+  });
+  const grid = cells.join("");
   const nav = related
     .map((r) => `<a class="meta-pill" href="${up}${r.path}/">${esc(r.label)}</a>`)
     .join("");
@@ -256,7 +266,10 @@ function landingHTML({ path, h1, metaTitle, metaDesc, intro, items, related }) {
 <meta property="og:url" content="${url}"/>
 <meta property="og:image" content="${SITE}/og-cover.png"/>
 <meta property="og:locale" content="ru_RU"/>
+<link rel="icon" href="${up}favicon.ico" sizes="48x48"/>
 <link rel="icon" href="${up}favicon.svg" type="image/svg+xml"/>
+<link rel="icon" href="${up}favicon-192.png" type="image/png" sizes="192x192"/>
+<link rel="apple-touch-icon" href="${up}apple-touch-icon.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://shikimori.io"/>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -266,7 +279,7 @@ function landingHTML({ path, h1, metaTitle, metaDesc, intro, items, related }) {
 <body>
 <div class="aurora"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
 <header class="header glass">
-  <a href="${up}index.html" class="logo"><span class="logo-mark">◢◤</span><span class="logo-text">Ani<span>Verse</span></span></a>
+  <a href="${up}index.html" class="logo"><span class="logo-mark">◢◤</span><span class="logo-text">Ani<span>Toki</span></span></a>
   <nav class="nav"><a href="${up}index.html" class="nav-link">Главная</a><a href="${up}index.html#/catalog" class="nav-link">Каталог</a></nav>
 </header>
 <main>
@@ -278,7 +291,7 @@ function landingHTML({ path, h1, metaTitle, metaDesc, intro, items, related }) {
   ${nav ? `<h2 class="section-title">Смотреть по категориям</h2><div class="meta-row">${nav}</div>` : ""}
 </main>
 <footer class="footer">
-  <p>AniVerse — каталог аниме онлайн. Видео предоставляет внешний плеер Kodik.</p>
+  <p>AniToki — каталог аниме онлайн. Видео предоставляет внешний плеер Kodik.</p>
 </footer>
 <div id="ad-bottom" class="ad-bar"><button class="ad-bar-close" aria-label="Закрыть">×</button><div class="ad-bar-inner"></div></div>
 <div id="ad-left" class="ad-rail"><div class="ad-rail-inner"></div></div>
@@ -365,8 +378,8 @@ function main() {
       {
         path: `zhanr/${slugify(g)}`,
         h1: `Аниме жанра «${g}»`,
-        metaTitle: `Аниме жанра ${g} — смотреть онлайн бесплатно | AniVerse`,
-        metaDesc: `Смотреть аниме в жанре ${g} онлайн бесплатно в хорошем качестве. ${items.length} тайтлов: новинки и популярная классика на AniVerse.`,
+        metaTitle: `Аниме жанра ${g} — смотреть онлайн бесплатно | AniToki`,
+        metaDesc: `Смотреть аниме в жанре ${g} онлайн бесплатно в хорошем качестве. ${items.length} тайтлов: новинки и популярная классика на AniToki.`,
         intro: `Подборка аниме в жанре «${g}» — ${items.length} тайтлов, отсортированных по рейтингу. Смотрите онлайн бесплатно в HD с озвучкой и субтитрами.`,
         items,
         related: [...relGenres.filter((r) => r.label !== g).slice(0, 12), relTop]
@@ -381,8 +394,8 @@ function main() {
       {
         path: `god/${y}`,
         h1: `Аниме ${y} года`,
-        metaTitle: `Аниме ${y} — смотреть онлайн бесплатно | AniVerse`,
-        metaDesc: `Аниме ${y} года: ${items.length} тайтлов онлайн бесплатно в хорошем качестве. Лучшие сериалы и фильмы ${y} на AniVerse.`,
+        metaTitle: `Аниме ${y} — смотреть онлайн бесплатно | AniToki`,
+        metaDesc: `Аниме ${y} года: ${items.length} тайтлов онлайн бесплатно в хорошем качестве. Лучшие сериалы и фильмы ${y} на AniToki.`,
         intro: `Аниме ${y} года — ${items.length} тайтлов по рейтингу. Новинки и хиты сезона, смотрите онлайн бесплатно в HD.`,
         items,
         related: [...relYears.filter((r) => r.label !== `Аниме ${y}`).slice(0, 12), ...relGenres.slice(0, 6), relTop]
@@ -397,8 +410,8 @@ function main() {
       {
         path: "reyting/top",
         h1: "Топ аниме по рейтингу",
-        metaTitle: "Топ аниме — лучшие тайтлы по рейтингу смотреть онлайн | AniVerse",
-        metaDesc: "Топ лучших аниме по рейтингу: смотрите самые высоко оценённые сериалы и фильмы онлайн бесплатно в HD на AniVerse.",
+        metaTitle: "Топ аниме — лучшие тайтлы по рейтингу смотреть онлайн | AniToki",
+        metaDesc: "Топ лучших аниме по рейтингу: смотрите самые высоко оценённые сериалы и фильмы онлайн бесплатно в HD на AniToki.",
         intro: "Рейтинг лучших аниме каталога — 30 тайтлов с самой высокой оценкой. Смотрите онлайн бесплатно в хорошем качестве.",
         items,
         related: [...relGenres.slice(0, 12), ...relYears.slice(0, 6)]
