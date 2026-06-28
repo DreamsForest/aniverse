@@ -17,6 +17,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 
 const SITE = (process.env.SITE_URL || "https://example.com").replace(/\/+$/, "");
+// Версия ассетов для сброса кеша браузера (?v=ГГГГММДД) — обновляется при каждой генерации
+const ASSET_V = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 
 // Грузим каталог из data.js
 function loadData() {
@@ -131,7 +133,7 @@ ${a.poster ? `<meta property="og:image" content="${esc(a.poster)}"/>` : ""}
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://shikimori.io"/>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="../../styles.css"/>
+<link rel="stylesheet" href="../../styles.css?v=${ASSET_V}"/>
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 </head>
 <body>
@@ -195,7 +197,7 @@ ${a.poster ? `<meta property="og:image" content="${esc(a.poster)}"/>` : ""}
 })();
 </script>
 <div id="ad-bottom" class="ad-bar"><button class="ad-bar-close" aria-label="Закрыть">×</button><div class="ad-bar-inner"></div></div>
-<script src="../../ads.js"></script>
+<script src="../../ads.js?v=${ASSET_V}"></script>
 </body>
 </html>`;
 }
@@ -245,12 +247,13 @@ function landingHTML({ path, h1, metaTitle, metaDesc, intro, items, related }) {
 <meta property="og:title" content="${esc(metaTitle)}"/>
 <meta property="og:description" content="${esc(metaDesc)}"/>
 <meta property="og:url" content="${url}"/>
+<meta property="og:image" content="${SITE}/og-cover.png"/>
 <meta property="og:locale" content="ru_RU"/>
 <link rel="icon" href="${up}favicon.svg" type="image/svg+xml"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://shikimori.io"/>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="${up}styles.css"/>
+<link rel="stylesheet" href="${up}styles.css?v=${ASSET_V}"/>
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 </head>
 <body>
@@ -270,7 +273,7 @@ function landingHTML({ path, h1, metaTitle, metaDesc, intro, items, related }) {
   <p>AniVerse — каталог аниме онлайн. Видео предоставляет внешний плеер Kodik.</p>
 </footer>
 <div id="ad-bottom" class="ad-bar"><button class="ad-bar-close" aria-label="Закрыть">×</button><div class="ad-bar-inner"></div></div>
-<script src="${up}ads.js"></script>
+<script src="${up}ads.js?v=${ASSET_V}"></script>
 </body>
 </html>`;
 }
@@ -429,8 +432,10 @@ function main() {
     const current = m && m[1];
     if (current && current !== SITE) idx = idx.split(current).join(SITE);
     idx = idx.replace(/https:\/\/example\.com/g, SITE);
+    // Версия ассетов для сброса кеша
+    idx = idx.replace(/(href|src)="(styles\.css|ads\.js)(\?v=[^"]*)?"/g, `$1="$2?v=${ASSET_V}"`);
     writeFileSync(idxPath, idx, "utf8");
-    console.log(`index.html: домен обновлён → ${SITE}`);
+    console.log(`index.html: домен и версия ассетов обновлены (v=${ASSET_V})`);
   }
 
   console.log(`Страниц тайтлов: ${count}`);
