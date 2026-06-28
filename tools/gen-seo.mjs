@@ -194,12 +194,18 @@ function main() {
     "utf8"
   );
 
-  // Проставляем домен в index.html (canonical / og:url / Schema.org)
+  // Проставляем домен в index.html (canonical / og:url / og:image / Schema.org).
+  // Заменяем ВСЕ вхождения текущего домена (берём из canonical), а не только example.com,
+  // иначе при смене домена index.html останется со старым адресом.
   if (!SITE.includes("example.com")) {
     const idxPath = join(ROOT, "index.html");
-    const idx = readFileSync(idxPath, "utf8").replace(/https:\/\/example\.com/g, SITE);
+    let idx = readFileSync(idxPath, "utf8");
+    const m = idx.match(/<link\s+rel="canonical"\s+href="(https?:\/\/[^/"]+)/i);
+    const current = m && m[1];
+    if (current && current !== SITE) idx = idx.split(current).join(SITE);
+    idx = idx.replace(/https:\/\/example\.com/g, SITE);
     writeFileSync(idxPath, idx, "utf8");
-    console.log("index.html: домен обновлён");
+    console.log(`index.html: домен обновлён → ${SITE}`);
   }
 
   console.log(`Сгенерировано страниц: ${count}`);
