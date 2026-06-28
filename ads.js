@@ -5,7 +5,7 @@
    пусто "" = реклама в этом месте не показывается):
    - bottomBanner — липкая полоса снизу (баннер 728×90).
    - inContent    — блоки в контенте (.ad-slot): между плеером и
-                    «Похожими», на главной, в середине каталога (728×90).
+                    «Похожими», на главной, в середине каталога (300×250).
    - sideBanner   — боковые рейлы слева/справа на широких экранах
                     (вертикальный баннер 160×600).
    - nativeGrid   — нативный блок в сетке карточек (.ad-card),
@@ -28,9 +28,23 @@ var AD_CODE = `
 <script type="text/javascript" src="https://www.highperformanceformat.com/e04a7f751115b2e15616ec2904525c10/invoke.js"></script>
 `;
 
+// Зона 300×250 (Medium Rectangle) — для блоков в контенте (.ad-slot)
+var AD_CODE_INCONTENT = `
+<script type="text/javascript">
+  atOptions = {
+    'key' : '4111ed3b419b8d020113e45b329c85d1',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script type="text/javascript" src="https://www.highperformanceformat.com/4111ed3b419b8d020113e45b329c85d1/invoke.js"></script>
+`;
+
 window.ANIVERSE_ADS = {
   bottomBanner: AD_CODE,
-  inContent: AD_CODE,
+  inContent: AD_CODE_INCONTENT,
   sideBanner: "", // ← код зоны 160×600 (Wide Skyscraper)
   nativeGrid: ""  // ← код зоны Native Banner
 };
@@ -93,7 +107,7 @@ window.ANIVERSE_ADS = {
       for (var i = 0; i < slots.length; i++) {
         (function (slot) {
           slot.dataset.adFilled = "1";
-          var f = banner(ic, 728, 90);
+          var f = banner(ic, 300, 250);
           slot.appendChild(f);
           whenFilled(f, function (ok) {
             if (ok) slot.style.display = "flex";
