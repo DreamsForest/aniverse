@@ -8,13 +8,23 @@
       между обратными кавычками. Пусто ("") = баннер скрыт.
    3. Готово — баннер появится липкой полосой снизу на всех страницах.
 
-   Скрипт корректно выполняет <script> из вставленного кода и
-   ничего не показывает, пока поле пустое (не ломает вёрстку).
+   Полоса показывается ТОЛЬКО когда реклама реально подгрузилась
+   (пока сеть на модерации/ничего не отдаёт — пустого бара нет).
    ============================================================ */
 window.ANIVERSE_ADS = {
-  // Пример (заменить на свой код зоны):
-  // bottomBanner: '<script async data-cfasync="false" src="//ad-network.example/banner.js"></script><div id="zone-12345"></div>',
-  bottomBanner: ""
+  // Adsterra — баннер 728×90 (зона e04a7f75…)
+  bottomBanner: `
+<script type="text/javascript">
+  atOptions = {
+    'key' : 'e04a7f751115b2e15616ec2904525c10',
+    'format' : 'iframe',
+    'height' : 90,
+    'width' : 728,
+    'params' : {}
+  };
+</script>
+<script type="text/javascript" src="https://www.highperformanceformat.com/e04a7f751115b2e15616ec2904525c10/invoke.js"></script>
+`
 };
 
 (function () {
@@ -34,13 +44,24 @@ window.ANIVERSE_ADS = {
   function init() {
     var cfg = window.ANIVERSE_ADS || {};
     var bar = document.getElementById("ad-bottom");
-    if (!bar) return;
-    if (cfg.bottomBanner && cfg.bottomBanner.trim()) {
-      exec(bar.querySelector(".ad-bar-inner"), cfg.bottomBanner);
-      bar.classList.add("show");
-      var close = bar.querySelector(".ad-bar-close");
-      if (close) close.addEventListener("click", function () { bar.remove(); });
-    }
+    if (!bar || !cfg.bottomBanner || !cfg.bottomBanner.trim()) return;
+    var inner = bar.querySelector(".ad-bar-inner");
+
+    // Кнопка закрытия
+    var close = bar.querySelector(".ad-bar-close");
+    if (close) close.addEventListener("click", function () { bar.remove(); });
+
+    // Показываем бар только когда внутри реально появился контент с высотой
+    // (баннер-iframe), а не просто служебные <script>.
+    var obs = new MutationObserver(function () {
+      if (inner.offsetHeight > 0) {
+        bar.classList.add("show");
+        obs.disconnect();
+      }
+    });
+    obs.observe(inner, { childList: true, subtree: true });
+
+    exec(inner, cfg.bottomBanner);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
