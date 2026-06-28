@@ -69,6 +69,18 @@ function gridHTML(list) {
   return `<div class="grid">${list.map(cardHTML).join("")}</div>`;
 }
 
+// Сетка каталога с рекламой: нативная карточка ближе к началу + баннер-ряд
+// по центру (появляется при прокрутке большого каталога). Слоты скрыты,
+// пока ads.js не подгрузит в них рекламу.
+function catalogGridHTML(list) {
+  if (!list.length) return gridHTML(list);
+  const cards = list.map(cardHTML);
+  if (cards.length > 6) cards.splice(6, 0, `<div class="ad-card" data-ad="native"></div>`);
+  const mid = Math.min(28, Math.floor(cards.length / 2));
+  cards.splice(mid, 0, `<div class="ad-slot ad-row" data-ad="in-content"></div>`);
+  return `<div class="grid">${cards.join("")}</div>`;
+}
+
 /* Все жанры из каталога */
 function allGenres() {
   const set = new Set();
@@ -185,11 +197,11 @@ function renderCatalog() {
       <select id="sortSelect" class="sort-select">${sortOptions}</select>
     </div>
     <div class="chips">${chips}</div>
-    <div id="catalogGrid">${gridHTML(filtered())}</div>
+    <div id="catalogGrid">${catalogGridHTML(filtered())}</div>
   `;
 
   const rerender = () => {
-    document.getElementById("catalogGrid").innerHTML = gridHTML(filtered());
+    document.getElementById("catalogGrid").innerHTML = catalogGridHTML(filtered());
   };
 
   app.querySelectorAll(".chip").forEach((chip) => {

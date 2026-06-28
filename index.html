@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>document.documentElement.classList.add("js")</script>
 
   <!-- Подтверждение прав в поисковых вебмастерах -->
   <meta name="yandex-verification" content="680e43ca7e70fbc4" />
@@ -35,7 +36,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preconnect" href="https://shikimori.io" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=202606281131" />
+  <link rel="stylesheet" href="styles.css?v=202606281144" />
 
   <!-- Schema.org: сайт + строка поиска -->
   <script type="application/ld+json">
@@ -90,14 +91,17 @@
     <p class="muted">Размещайте только тот контент, на который у вас есть права.</p>
   </footer>
 
-  <!-- Рекламный баннер (заполняется из ads.js, скрыт пока код не задан) -->
+  <!-- Реклама: липкая полоса снизу + боковые рейлы (скрыты, пока нет кода/филла) -->
   <div id="ad-bottom" class="ad-bar">
     <button class="ad-bar-close" aria-label="Закрыть">×</button>
     <div class="ad-bar-inner"></div>
   </div>
+  <div id="ad-left" class="ad-rail"><div class="ad-rail-inner"></div></div>
+  <div id="ad-right" class="ad-rail"><div class="ad-rail-inner"></div></div>
 
   <script src="data.js"></script>
   <script src="app.js"></script>
-  <script src="ads.js?v=202606281131"></script>
+  <script src="ui.js?v=202606281144"></script>
+  <script src="ads.js?v=202606281144"></script>
 </body>
 </html>

@@ -574,6 +574,56 @@ main {
 }
 @keyframes shimmer { to { background-position: -200% 0; } }
 
+/* Появление карточек при прокрутке (только при включённом JS) */
+html.js .card {
+  opacity: 0;
+  transition: opacity .55s ease, transform .25s, box-shadow .25s, border-color .25s;
+}
+html.js .card.in { opacity: 1; }
+
+/* ===== Реклама в сетке карточек ===== */
+/* Горизонтальный баннер-ряд во всю ширину сетки (появляется по центру каталога) */
+.ad-row { grid-column: 1 / -1; }
+/* Нативная «карточка»-реклама — занимает ячейку как обычная карточка */
+.ad-card {
+  display: none;                 /* показывается из ads.js при наличии рекламы */
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-soft);
+  border: 1px solid var(--glass-brd);
+  align-items: center;
+  justify-content: center;
+}
+.ad-card::after {                /* лёгкая пометка «реклама» */
+  content: "Реклама";
+  position: absolute;
+  top: 8px; left: 8px;
+  font-size: 10px;
+  color: var(--muted);
+  background: rgba(7, 6, 15, 0.55);
+  padding: 2px 7px;
+  border-radius: 7px;
+  z-index: 2;
+}
+
+/* ===== Боковые рекламные рейлы (только на широких экранах) ===== */
+.ad-rail {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 160px;
+  z-index: 40;
+  display: none;
+}
+.ad-rail.show { display: block; }
+#ad-left { left: 14px; }
+#ad-right { right: 14px; }
+@media (max-width: 1640px) {
+  .ad-rail { display: none !important; }   /* нет места рядом с контентом */
+}
+
 /* ===== Адаптив ===== */
 @media (max-width: 720px) {
   /* Шапка переносится в 2 строки: [лого + меню] / [поиск].

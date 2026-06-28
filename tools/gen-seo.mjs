@@ -118,6 +118,7 @@ function pageHTML(a, all, KODIK_TOKEN, KODIK_API, landedGenres = new Set(), rela
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script>document.documentElement.classList.add("js")</script>
 <title>${esc(metaTitle)}</title>
 <meta name="description" content="${esc(metaDesc)}"/>
 <link rel="canonical" href="${url}"/>
@@ -199,6 +200,9 @@ ${a.poster ? `<meta property="og:image" content="${esc(a.poster)}"/>` : ""}
 })();
 </script>
 <div id="ad-bottom" class="ad-bar"><button class="ad-bar-close" aria-label="Закрыть">×</button><div class="ad-bar-inner"></div></div>
+<div id="ad-left" class="ad-rail"><div class="ad-rail-inner"></div></div>
+<div id="ad-right" class="ad-rail"><div class="ad-rail-inner"></div></div>
+<script src="../../ui.js?v=${ASSET_V}"></script>
 <script src="../../ads.js?v=${ASSET_V}"></script>
 </body>
 </html>`;
@@ -241,6 +245,7 @@ function landingHTML({ path, h1, metaTitle, metaDesc, intro, items, related }) {
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script>document.documentElement.classList.add("js")</script>
 <title>${esc(metaTitle)}</title>
 <meta name="description" content="${esc(metaDesc)}"/>
 <link rel="canonical" href="${url}"/>
@@ -276,6 +281,9 @@ function landingHTML({ path, h1, metaTitle, metaDesc, intro, items, related }) {
   <p>AniVerse — каталог аниме онлайн. Видео предоставляет внешний плеер Kodik.</p>
 </footer>
 <div id="ad-bottom" class="ad-bar"><button class="ad-bar-close" aria-label="Закрыть">×</button><div class="ad-bar-inner"></div></div>
+<div id="ad-left" class="ad-rail"><div class="ad-rail-inner"></div></div>
+<div id="ad-right" class="ad-rail"><div class="ad-rail-inner"></div></div>
+<script src="${up}ui.js?v=${ASSET_V}"></script>
 <script src="${up}ads.js?v=${ASSET_V}"></script>
 </body>
 </html>`;
@@ -436,7 +444,7 @@ function main() {
     if (current && current !== SITE) idx = idx.split(current).join(SITE);
     idx = idx.replace(/https:\/\/example\.com/g, SITE);
     // Версия ассетов для сброса кеша
-    idx = idx.replace(/(href|src)="(styles\.css|ads\.js)(\?v=[^"]*)?"/g, `$1="$2?v=${ASSET_V}"`);
+    idx = idx.replace(/(href|src)="(styles\.css|ads\.js|ui\.js)(\?v=[^"]*)?"/g, `$1="$2?v=${ASSET_V}"`);
     writeFileSync(idxPath, idx, "utf8");
     console.log(`index.html: домен и версия ассетов обновлены (v=${ASSET_V})`);
   }
