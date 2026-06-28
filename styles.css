@@ -508,8 +508,43 @@ main {
 
 /* ===== Адаптив ===== */
 @media (max-width: 720px) {
-  .nav { display: none; }
-  .header { gap: 12px; }
+  /* Шапка переносится в 2 строки: [лого + меню] / [поиск].
+     Меню НЕ прячем — просто делаем компактным. */
+  .header {
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    padding: 12px 16px;
+  }
+  .logo { font-size: 19px; }
+  .nav {
+    margin-left: auto;       /* прижать меню к правому краю верхней строки */
+    gap: 6px;
+  }
+  .nav-link { padding: 8px 13px; font-size: 13px; }
+  .search {
+    order: 3;                /* уходит на вторую строку */
+    flex-basis: 100%;
+    max-width: none;
+    padding: 9px 14px;
+  }
+
+  main { padding: 20px 16px 48px; }
+  .section-title { font-size: 19px; margin: 26px 0 14px; }
+
   .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
-  .title-poster { width: 150px; margin: 0 auto; }
+
+  /* Баннер тайтла — в одну колонку, постер по центру */
+  .title-banner { gap: 20px; }
+  .title-poster { width: 160px; margin: 0 auto; }
+  .title-info { min-width: 0; }       /* не распирать строку длинным текстом */
+
+  .hero { min-height: 280px; }
+  .hero-actions .btn { flex: 1; justify-content: center; }
+}
+
+@media (max-width: 420px) {
+  .grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+  .logo-text { font-size: 17px; }
+  .card-title { font-size: 13px; }
+  .nav-link { padding: 7px 11px; font-size: 12px; }
 }

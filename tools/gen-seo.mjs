@@ -53,6 +53,21 @@ const slugify = (s) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
+// Ключ франшизы: нормализуем romaji-название, выкидывая указатели сезонов/частей
+// (2nd season, part, ova, римские цифры…), чтобы все сезоны тайтла попали в одну группу.
+const FRANCHISE_STOP = new Set(["the", "final", "season", "part", "cour", "movie", "tv", "ova", "ona", "specials", "special"]);
+const franchiseKey = (a) =>
+  String(a.original || a.title || "")
+    .toLowerCase()
+    .replace(/[:\-–—!?,.()]/g, " ")
+    .replace(/\b(\d+)(st|nd|rd|th)\b/g, " ")
+    .replace(/\b(i{1,3}|iv|v|vi{0,3})\b/g, " ")
+    .replace(/\s+\d+\s*$/, " ")
+    .split(/\s+/)
+    .filter((w) => w && !FRANCHISE_STOP.has(w))
+    .join(" ")
+    .trim();
+
 // Карточка тайтла. hrefBase — относительный путь к папке anime/ от текущей страницы.
 const cardHTML = (x, hrefBase) =>
   `<a class="card" href="${hrefBase}${x.id}/">
@@ -62,7 +77,7 @@ const cardHTML = (x, hrefBase) =>
     </div>
   </a>`;
 
-function pageHTML(a, all, KODIK_TOKEN, KODIK_API, landedGenres = new Set()) {
+function pageHTML(a, all, KODIK_TOKEN, KODIK_API, landedGenres = new Set(), related = []) {
   const url = `${SITE}/anime/${a.id}/`;
   const metaTitle = `${a.title}${a.original ? " (" + a.original + ")" : ""} — смотреть онлайн | AniVerse`;
   const metaDesc =
@@ -88,6 +103,13 @@ function pageHTML(a, all, KODIK_TOKEN, KODIK_API, landedGenres = new Set()) {
     .slice(0, 8)
     .map((x) => cardHTML(x, "../"))
     .join("");
+
+  // Связанные сезоны/части той же франшизы (в хронологическом порядке)
+  const seasons = related.length
+    ? `<h2 class="section-title">Сезоны и связанные части</h2>
+  <p class="title-desc">Другие части франшизы «${esc(a.title)}» — смотрите по порядку:</p>
+  <div class="grid">${related.map((x) => cardHTML(x, "../")).join("")}</div>`
+    : "";
 
   return `<!DOCTYPE html>
 <html lang="ru">
@@ -143,6 +165,8 @@ ${a.poster ? `<meta property="og:image" content="${esc(a.poster)}"/>` : ""}
   <div class="player-wrap" id="player">
     <div class="player-loading"><div class="spinner"></div><p>Загружаем плеер…</p></div>
   </div>
+
+  ${seasons}
 
   ${similar ? `<h2 class="section-title">Похожие аниме</h2><div class="grid">${similar}</div>` : ""}
 </main>
@@ -267,11 +291,30 @@ function main() {
     .sort((a, b) => genreCounts[b] - genreCounts[a]);
   const landedGenres = new Set(genres); // у этих жанров есть лендинг → можно ссылаться
 
+  // Франшизы: группируем сезоны/части одного тайтла для блока «Связанные сезоны».
+  const franchiseGroups = {};
+  for (const a of ANIME) {
+    const k = franchiseKey(a);
+    if (k) (franchiseGroups[k] = franchiseGroups[k] || []).push(a);
+  }
+  const relatedById = {};
+  for (const list of Object.values(franchiseGroups)) {
+    if (list.length < 2) continue;
+    const sorted = [...list].sort(
+      (a, b) => (a.year || 0) - (b.year || 0) || String(a.title).localeCompare(String(b.title), "ru")
+    );
+    for (const a of sorted) relatedById[a.id] = sorted.filter((x) => x.id !== a.id);
+  }
+
   let count = 0;
   for (const a of ANIME) {
     const dir = join(ROOT, "anime", String(a.id));
     mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, "index.html"), pageHTML(a, ANIME, KODIK_TOKEN, KODIK_API, landedGenres), "utf8");
+    writeFileSync(
+      join(dir, "index.html"),
+      pageHTML(a, ANIME, KODIK_TOKEN, KODIK_API, landedGenres, relatedById[a.id] || []),
+      "utf8"
+    );
     count++;
   }
 
