@@ -292,9 +292,11 @@ function main() {
   const landedGenres = new Set(genres); // у этих жанров есть лендинг → можно ссылаться
 
   // Франшизы: группируем сезоны/части одного тайтла для блока «Связанные сезоны».
+  // Основной ключ — поле franchise из Shikimori (надёжно ловит сезоны с собственными
+  // подзаголовками). Если его нет — откатываемся на нормализованное название.
   const franchiseGroups = {};
   for (const a of ANIME) {
-    const k = franchiseKey(a);
+    const k = a.franchise ? `f:${a.franchise}` : franchiseKey(a) ? `k:${franchiseKey(a)}` : "";
     if (k) (franchiseGroups[k] = franchiseGroups[k] || []).push(a);
   }
   const relatedById = {};

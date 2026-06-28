@@ -40,7 +40,7 @@ function cleanDesc(s) {
 async function gqlPage(page) {
   const query = `{
     animes(order: popularity, limit: 50, page: ${page}, kind: "tv") {
-      id russian name score status
+      id russian name score status franchise
       airedOn { year }
       genres { russian }
       poster { mainUrl }
@@ -105,7 +105,8 @@ async function main() {
         rating: a.score ? Number(a.score) : 0,
         status: STATUS_MAP[a.status] || "Завершён",
         poster: a.poster.mainUrl,
-        description: cleanDesc(a.description)
+        description: cleanDesc(a.description),
+        franchise: a.franchise || ""
       });
     }
     await sleep(180);
