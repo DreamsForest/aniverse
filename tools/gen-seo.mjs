@@ -17,8 +17,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 
 const SITE = (process.env.SITE_URL || "https://example.com").replace(/\/+$/, "");
-// Версия ассетов для сброса кеша браузера (?v=ГГГГММДД) — обновляется при каждой генерации
-const ASSET_V = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+// Версия ассетов для сброса кеша браузера (?v=ГГГГММДДЧЧММ) — меняется при каждой генерации
+const ASSET_V = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "");
 
 // Грузим каталог из data.js
 function loadData() {
