@@ -506,6 +506,40 @@ main {
 @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 .fade { animation: fadeUp .45s ease both; }
 
+/* ===== Рекламные места (монетизация) ===== */
+/* Липкая полоса-баннер снизу. Показывается только когда задан код в ads.js. */
+.ad-bar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 60;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(13, 11, 26, 0.92);
+  border-top: 1px solid var(--glass-brd);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.ad-bar.show { display: flex; }
+.ad-bar-inner { max-width: 100%; overflow: hidden; }
+.ad-bar-inner:empty { display: none; }
+.ad-bar-close {
+  position: absolute;
+  top: -13px; right: 12px;
+  width: 27px; height: 27px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-brd);
+  background: var(--bg-soft);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+/* Блок-баннер внутри контента. Тоже скрыт, пока пустой. */
+.ad-slot { margin: 26px 0; display: flex; justify-content: center; }
+.ad-slot:empty { display: none; }
+
 /* ===== Адаптив ===== */
 @media (max-width: 720px) {
   /* Шапка переносится в 2 строки: [лого + меню] / [поиск].

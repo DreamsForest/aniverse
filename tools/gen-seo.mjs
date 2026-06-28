@@ -194,6 +194,8 @@ ${a.poster ? `<meta property="og:image" content="${esc(a.poster)}"/>` : ""}
   }
 })();
 </script>
+<div id="ad-bottom" class="ad-bar"><button class="ad-bar-close" aria-label="Закрыть">×</button><div class="ad-bar-inner"></div></div>
+<script src="../../ads.js"></script>
 </body>
 </html>`;
 }
@@ -267,6 +269,8 @@ function landingHTML({ path, h1, metaTitle, metaDesc, intro, items, related }) {
 <footer class="footer">
   <p>AniVerse — каталог аниме онлайн. Видео предоставляет внешний плеер Kodik.</p>
 </footer>
+<div id="ad-bottom" class="ad-bar"><button class="ad-bar-close" aria-label="Закрыть">×</button><div class="ad-bar-inner"></div></div>
+<script src="${up}ads.js"></script>
 </body>
 </html>`;
 }
