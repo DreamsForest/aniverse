@@ -74,7 +74,7 @@ const franchiseKey = (a) =>
 const cardHTML = (x, hrefBase) =>
   `<a class="card" href="${hrefBase}${x.id}/">
     <div class="poster" style="background:linear-gradient(135deg,#221a4d,#3a1d52)">
-      ${x.poster ? `<img src="${esc(x.poster)}" alt="${esc(x.title)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"/>` : ""}
+      ${x.poster ? `<img src="${esc(x.poster)}" alt="${esc(x.title)}" loading="lazy" referrerpolicy="no-referrer" onload="this.classList.add('loaded')" onerror="this.remove()"/>` : ""}
       <div class="card-body"><h3 class="card-title">${esc(x.title)}</h3><div class="card-meta">${[x.year, (x.genres || [])[0]].filter(Boolean).join(" · ")}</div></div>
     </div>
   </a>`;
@@ -146,7 +146,7 @@ ${a.poster ? `<meta property="og:image" content="${esc(a.poster)}"/>` : ""}
   <a class="back-link" href="../../index.html#/catalog">← В каталог</a>
   <article class="title-banner">
     <div class="title-poster" style="background:linear-gradient(135deg,#1c1740,#34184a)">
-      ${a.poster ? `<img src="${esc(a.poster)}" alt="${esc(a.title)}" referrerpolicy="no-referrer" onerror="this.remove()"/>` : esc(a.title)}
+      ${a.poster ? `<img src="${esc(a.poster)}" alt="${esc(a.title)}" referrerpolicy="no-referrer" onload="this.classList.add('loaded')" onerror="this.remove()"/>` : esc(a.title)}
     </div>
     <div class="title-info">
       <h1>${esc(a.title)} — смотреть онлайн</h1>
@@ -169,6 +169,8 @@ ${a.poster ? `<meta property="og:image" content="${esc(a.poster)}"/>` : ""}
   </div>
 
   ${seasons}
+
+  <div class="ad-slot" data-ad="in-content"></div>
 
   ${similar ? `<h2 class="section-title">Похожие аниме</h2><div class="grid">${similar}</div>` : ""}
 </main>
@@ -267,6 +269,7 @@ function landingHTML({ path, h1, metaTitle, metaDesc, intro, items, related }) {
   <h1>${esc(h1)}</h1>
   <p class="title-desc">${esc(intro)}</p>
   <div class="grid">${grid}</div>
+  <div class="ad-slot" data-ad="in-content"></div>
   ${nav ? `<h2 class="section-title">Смотреть по категориям</h2><div class="meta-row">${nav}</div>` : ""}
 </main>
 <footer class="footer">

@@ -1,20 +1,21 @@
 /* ============================================================
    Монетизация AniVerse — единая точка для рекламных баннеров.
 
-   КАК ПОДКЛЮЧИТЬ:
-   1. Зарегистрируйся в рекламной сети (Adsterra / Monetag и т.п.),
-      создай зону «баннер», скопируй её код.
-   2. Вставь этот код (с <script>) в поле bottomBanner ниже,
-      между обратными кавычками. Пусто ("") = баннер скрыт.
+   ПОЛЯ:
+   - bottomBanner — липкая полоса снизу на всех страницах.
+   - inContent    — блок(и) в контенте (.ad-slot): на страницах тайтлов
+                    между плеером и «Похожими», на главной и лендингах.
+
+   Вставь код зоны от рекламной сети между обратными кавычками.
+   Пусто ("") = соответствующая реклама не показывается.
+   Лучше для каждого места завести ОТДЕЛЬНУЮ зону в кабинете сети
+   (точнее статистика и выше заполняемость), но можно временно
+   использовать один и тот же код.
 
    Баннер грузится в изолированном iframe (srcdoc) — так код сети
-   выполняется штатно (document.write/currentScript работают), что
-   надёжнее прямой вставки в DOM. Полоса снизу показывается ТОЛЬКО
-   когда реклама реально подгрузилась (нет филла — нет пустого бара).
+   выполняется штатно. Контейнер показывается только при реальном филле.
    ============================================================ */
-window.ANIVERSE_ADS = {
-  // Adsterra — баннер 728×90 (зона e04a7f75…)
-  bottomBanner: `
+var AD_CODE = `
 <script type="text/javascript">
   atOptions = {
     'key' : 'e04a7f751115b2e15616ec2904525c10',
@@ -25,46 +26,78 @@ window.ANIVERSE_ADS = {
   };
 </script>
 <script type="text/javascript" src="https://www.highperformanceformat.com/e04a7f751115b2e15616ec2904525c10/invoke.js"></script>
-`
+`;
+
+window.ANIVERSE_ADS = {
+  bottomBanner: AD_CODE,
+  inContent: AD_CODE // ← заведи отдельную зону и вставь сюда её код
 };
 
 (function () {
-  function init() {
-    var cfg = window.ANIVERSE_ADS || {};
-    var bar = document.getElementById("ad-bottom");
-    if (!bar || !cfg.bottomBanner || !cfg.bottomBanner.trim()) return;
-    var inner = bar.querySelector(".ad-bar-inner");
-
-    var close = bar.querySelector(".ad-bar-close");
-    if (close) close.addEventListener("click", function () { bar.remove(); });
-
-    // Баннер — в собственном iframe, чтобы код сети выполнился корректно
-    var frame = document.createElement("iframe");
-    frame.setAttribute("scrolling", "no");
-    frame.setAttribute("title", "advertising");
-    frame.style.cssText = "width:728px;max-width:100vw;height:90px;border:0;display:block;";
-    frame.srcdoc =
+  function bannerIframe(code, w, h) {
+    var f = document.createElement("iframe");
+    f.setAttribute("scrolling", "no");
+    f.setAttribute("title", "advertising");
+    f.setAttribute("loading", "lazy");
+    f.style.cssText = "width:" + w + "px;max-width:100%;height:" + h + "px;border:0;display:block;margin:0 auto;";
+    f.srcdoc =
       "<!DOCTYPE html><html><head><meta charset='utf-8'>" +
       "<style>html,body{margin:0;padding:0;overflow:hidden}</style></head><body>" +
-      cfg.bottomBanner +
-      "</body></html>";
-    inner.appendChild(frame);
+      code + "</body></html>";
+    return f;
+  }
 
-    // Показываем полосу, только когда внутри iframe реально появилась реклама
-    var tries = 0;
-    var timer = setInterval(function () {
-      tries++;
+  // Вызывает cb(true) когда внутри iframe реально появилась реклама, иначе cb(false)
+  function whenFilled(frame, cb) {
+    var n = 0;
+    var t = setInterval(function () {
+      n++;
       try {
-        var doc = frame.contentDocument;
-        if (doc && doc.querySelector("iframe, img, ins")) {
-          bar.classList.add("show");
-          clearInterval(timer);
-        }
-      } catch (e) {
-        /* контент сети кросс-доменный — игнорируем */
-      }
-      if (tries > 20) clearInterval(timer); // ~10с без филла → полоса не показывается
+        var d = frame.contentDocument;
+        if (d && d.querySelector("iframe, img, ins")) { clearInterval(t); cb(true); }
+      } catch (e) { /* контент сети кросс-доменный */ }
+      if (n > 20) { clearInterval(t); cb(false); } // ~10с без филла
     }, 500);
+  }
+
+  function mountSticky(code) {
+    var bar = document.getElementById("ad-bottom");
+    if (!bar) return;
+    var inner = bar.querySelector(".ad-bar-inner");
+    var close = bar.querySelector(".ad-bar-close");
+    if (close) close.addEventListener("click", function () { bar.remove(); });
+    var f = bannerIframe(code, 728, 90);
+    inner.appendChild(f);
+    whenFilled(f, function (ok) { if (ok) bar.classList.add("show"); });
+  }
+
+  function mountInline(slot, code) {
+    if (slot.dataset.adFilled) return;
+    slot.dataset.adFilled = "1";
+    var f = bannerIframe(code, 728, 90);
+    slot.appendChild(f);
+    whenFilled(f, function (ok) {
+      if (ok) slot.style.display = "flex";
+      else if (slot.parentNode) slot.parentNode.removeChild(slot);
+    });
+  }
+
+  function fillInline() {
+    var code = (window.ANIVERSE_ADS || {}).inContent;
+    if (!code || !code.trim()) return;
+    var slots = document.querySelectorAll(".ad-slot:not([data-ad-filled])");
+    for (var i = 0; i < slots.length; i++) mountInline(slots[i], code);
+  }
+
+  function init() {
+    var cfg = window.ANIVERSE_ADS || {};
+    if (cfg.bottomBanner && cfg.bottomBanner.trim()) mountSticky(cfg.bottomBanner);
+    fillInline();
+    // SPA подгружает контент динамически — дозаполняем новые слоты
+    if (window.MutationObserver) {
+      var obs = new MutationObserver(function () { fillInline(); });
+      obs.observe(document.body, { childList: true, subtree: true });
+    }
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

@@ -23,7 +23,7 @@ function gradientFor(str) {
 
 function posterHTML(a) {
   if (a.poster)
-    return `<img src="${a.poster}" alt="${escapeAttr(a.title)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" />`;
+    return `<img src="${a.poster}" alt="${escapeAttr(a.title)}" loading="lazy" referrerpolicy="no-referrer" onload="this.classList.add('loaded')" onerror="this.remove()" />`;
   return `<div class="poster-fallback">${a.title}</div>`;
 }
 
@@ -153,6 +153,8 @@ function renderHome() {
     ${history.length ? `<h2 class="section-title">Продолжить просмотр</h2>${gridHTML(history)}` : ""}
 
     ${fresh.length ? `<h2 class="section-title">✦ Новинки 2026</h2>${gridHTML(fresh.slice(0, 18))}` : ""}
+
+    <div class="ad-slot" data-ad="in-content"></div>
 
     <h2 class="section-title">Популярное</h2>
     ${gridHTML(trending)}
