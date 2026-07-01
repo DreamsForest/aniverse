@@ -280,6 +280,12 @@
         <div class="allc-actions">
           <span class="allc-votes">▲ ${c.likes} · ▼ ${c.dislikes}</span>
           ${c.deleted ? "" : `<button class="btn btn-ghost sm" data-act="del">Удалить</button>`}
+          ${c.isAdmin ? "" : `
+            <span class="rep-mod">
+              ${daysChips()}
+              <button class="btn sm" data-act="mute">Мут</button>
+              <button class="btn sm danger" data-act="ban">Бан</button>
+            </span>`}
         </div>
       </div>`;
   }
@@ -292,6 +298,17 @@
       if (!confirm("Удалить комментарий?")) return;
       if (await act(`/comment/${c.id}`, { method: "DELETE" }, "Комментарий удалён.")) loadAllComments(true);
     };
+    bindDayChips(cardEl);
+    const daysWrap = cardEl.querySelector(".mod-days");
+    cardEl.querySelectorAll('[data-act="mute"], [data-act="ban"]').forEach((btn) => {
+      btn.onclick = async () => {
+        const a = btn.dataset.act;
+        const days = Number(daysWrap ? daysWrap.dataset.days : 7) || 7;
+        const reason = prompt(`Причина ${a === "ban" ? "бана" : "мута"} для ${c.author} (необязательно):`) || "";
+        if (await act("/admin/moderate", { method: "POST", body: { userId: c.authorId, action: a, days, reason } },
+                      `${a === "ban" ? "Бан" : "Мут"} на ${days} дн. выдан.`)) loadViolators();
+      };
+    });
   }
 
   moreBtn.onclick = () => loadAllComments(false);
