@@ -134,7 +134,6 @@
             <button class="cm-vote up ${c.myVote === 1 ? "on" : ""}" data-v="1">▲ <span class="cm-likes">${c.likes}</span></button>
             <button class="cm-vote down ${c.myVote === -1 ? "on" : ""}" data-v="-1">▼ <span class="cm-dislikes">${c.dislikes}</span></button>
             <button class="cm-report" data-act="report-comment">Пожаловаться</button>
-            ${!c.mine ? `<button class="cm-report" data-act="report-user">На пользователя</button>` : ""}
             ${canDelete ? `<button class="cm-del" data-act="delete">Удалить</button>` : ""}
           </div>
         </div>
@@ -171,16 +170,6 @@
       const reason = prompt("Причина жалобы на комментарий (необязательно):");
       if (reason === null) return;
       const { ok, data } = await A().api(`/comment/${id}/report`, { method: "POST", body: { reason } });
-      A().toast(ok ? (data.message || "Жалоба отправлена.") : (data.error || "Ошибка."), ok ? "ok" : "error");
-    };
-
-    const repU = item.querySelector('[data-act="report-user"]');
-    if (repU) repU.onclick = async () => {
-      if (!A().user) return A().openModal("login");
-      const userId = Number(item.dataset.author);
-      const reason = prompt(`Причина жалобы на пользователя ${item.dataset.authorName} (необязательно):`);
-      if (reason === null) return;
-      const { ok, data } = await A().api(`/report-user`, { method: "POST", body: { userId, reason } });
       A().toast(ok ? (data.message || "Жалоба отправлена.") : (data.error || "Ошибка."), ok ? "ok" : "error");
     };
 
