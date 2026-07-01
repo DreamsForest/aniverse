@@ -901,3 +901,19 @@ html.js .card.in { opacity: 1; }
 /* ===== Доработки форм авторизации ===== */
 .ani-form-lead { color: var(--muted); font-size: 13px; margin: 0 0 4px; }
 .ani-form-alt .ani-dot { color: var(--muted); margin: 0 4px; }
+
+/* ===== Все комментарии (админ) ===== */
+.all-comments { display: flex; flex-direction: column; gap: 10px; }
+.allc-card {
+  padding: 12px 16px; border-radius: 14px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--glass-brd);
+}
+.allc-card.allc-deleted { opacity: .55; }
+.allc-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.allc-author { font-weight: 700; }
+.allc-title { color: var(--muted); font-size: 13px; }
+.allc-title a { color: var(--neon-2); }
+.allc-body { line-height: 1.5; overflow-wrap: anywhere; }
+.allc-actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.allc-votes { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.allc-more-wrap { display: flex; justify-content: center; margin-top: 14px; }

@@ -30,11 +30,16 @@
 
     <h2 class="admin-h2">Нарушители <span class="muted" id="viol-count"></span></h2>
     <div id="violators" class="violators"></div>
+
+    <h2 class="admin-h2">Все комментарии <span class="muted" id="cmall-count"></span></h2>
+    <div id="all-comments" class="all-comments"></div>
+    <div class="allc-more-wrap"><button class="btn btn-ghost" id="cmall-more" hidden>Показать ещё</button></div>
   </div>
 </main>
 
 <footer class="footer"><p>AniToki — панель модерации.</p></footer>
 
+<script src="data.js"></script>
 <script src="auth.js"></script>
 <script>
 (function () {
@@ -50,8 +55,18 @@
   const violatorsEl = document.getElementById("violators");
   const repCount = document.getElementById("rep-count");
   const violCount = document.getElementById("viol-count");
+  const allCommentsEl = document.getElementById("all-comments");
+  const allCountEl = document.getElementById("cmall-count");
+  const moreBtn = document.getElementById("cmall-more");
 
   let tickTimer = null;
+  let allcOffset = 0;
+  const ALLC_LIMIT = 50;
+
+  // карта id тайтла → название (из data.js, глобальный ANIME)
+  const titleMap = {};
+  try { (typeof ANIME !== "undefined" ? ANIME : []).forEach((a) => { titleMap[String(a.id)] = a.title; }); } catch (e) {}
+  const titleName = (id) => titleMap[String(id)] || ("тайтл #" + id);
 
   function setView(user) {
     if (!user) {
@@ -69,7 +84,7 @@
     loadAll();
   }
 
-  async function loadAll() { await Promise.all([loadReports(), loadViolators()]); }
+  async function loadAll() { await Promise.all([loadReports(), loadViolators(), loadAllComments(true)]); }
 
   /* ---------- общий вызов действия ---------- */
   async function act(path, opts, okMsg) {
@@ -236,6 +251,50 @@
   }
   function startTick() { stopTick(); tick(); tickTimer = setInterval(tick, 1000); }
   function stopTick() { if (tickTimer) { clearInterval(tickTimer); tickTimer = null; } }
+
+  /* ================= ВСЕ КОММЕНТАРИИ ================= */
+  async function loadAllComments(reset) {
+    if (reset) { allcOffset = 0; allCommentsEl.innerHTML = `<p class="muted">Загрузка…</p>`; }
+    const { ok, data } = await A().api(`/admin/comments?offset=${allcOffset}&limit=${ALLC_LIMIT}`);
+    if (!ok) { allCommentsEl.innerHTML = `<p class="muted">${esc(data.error || "Ошибка.")}</p>`; return; }
+    const list = data.comments || [];
+    if (reset) allCommentsEl.innerHTML = list.length ? "" : `<p class="muted">Комментариев пока нет.</p>`;
+    list.forEach((c) => { allCommentsEl.insertAdjacentHTML("beforeend", allcCard(c)); bindAllc(c); });
+    allcOffset += list.length;
+    allCountEl.textContent = allcOffset ? `(показано ${allcOffset})` : "";
+    moreBtn.hidden = !data.hasMore;
+  }
+
+  function allcCard(c) {
+    const badge = A().lvlBadge ? A().lvlBadge(c.authorLevel, c.authorTier) : "";
+    const adminTag = c.isAdmin ? `<span class="cm-badge">админ</span>` : "";
+    const link = `/anime/${encodeURIComponent(c.animeId)}/`;
+    return `
+      <div class="allc-card${c.deleted ? " allc-deleted" : ""}" data-id="${c.id}">
+        <div class="allc-top">
+          ${badge}<span class="allc-author">${esc(c.author)}</span>${adminTag}
+          <span class="allc-title">→ <a href="${link}" target="_blank" rel="noopener">${esc(titleName(c.animeId))}</a></span>
+          <span class="rep-time">${fmt(c.createdAt)}</span>
+        </div>
+        <div class="allc-body">${c.deleted ? "<i>(удалён)</i> " : ""}${esc(c.body).replace(/\n/g, "<br>")}</div>
+        <div class="allc-actions">
+          <span class="allc-votes">▲ ${c.likes} · ▼ ${c.dislikes}</span>
+          ${c.deleted ? "" : `<button class="btn btn-ghost sm" data-act="del">Удалить</button>`}
+        </div>
+      </div>`;
+  }
+
+  function bindAllc(c) {
+    const cardEl = allCommentsEl.querySelector(`.allc-card[data-id="${c.id}"]`);
+    if (!cardEl) return;
+    const del = cardEl.querySelector('[data-act="del"]');
+    if (del) del.onclick = async () => {
+      if (!confirm("Удалить комментарий?")) return;
+      if (await act(`/comment/${c.id}`, { method: "DELETE" }, "Комментарий удалён.")) loadAllComments(true);
+    };
+  }
+
+  moreBtn.onclick = () => loadAllComments(false);
 
   document.getElementById("reload").onclick = loadAll;
   A().onChange(setView);
