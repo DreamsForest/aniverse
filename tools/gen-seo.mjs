@@ -177,6 +177,8 @@ ${a.poster ? `<meta property="og:image" content="${esc(a.poster)}"/>` : ""}
   <div class="ad-slot" data-ad="in-content"></div>
 
   ${similar ? `<h2 class="section-title">Похожие аниме</h2><div class="grid">${similar}</div>` : ""}
+
+  <div id="comments-root" data-anime-id="${esc(a.id)}"></div>
 </main>
 <footer class="footer">
   <p>AniToki — каталог аниме онлайн. Видео предоставляет внешний плеер Kodik.</p>
@@ -207,6 +209,8 @@ ${a.poster ? `<meta property="og:image" content="${esc(a.poster)}"/>` : ""}
 <div id="ad-right" class="ad-rail"><div class="ad-rail-inner"></div></div>
 <script src="../../ui.js?v=${ASSET_V}"></script>
 <script src="../../ads.js?v=${ASSET_V}"></script>
+<script src="../../auth.js?v=${ASSET_V}"></script>
+<script src="../../comments.js?v=${ASSET_V}"></script>
 </body>
 </html>`;
 }
@@ -298,6 +302,7 @@ function landingHTML({ path, h1, metaTitle, metaDesc, intro, items, related }) {
 <div id="ad-right" class="ad-rail"><div class="ad-rail-inner"></div></div>
 <script src="${up}ui.js?v=${ASSET_V}"></script>
 <script src="${up}ads.js?v=${ASSET_V}"></script>
+<script src="${up}auth.js?v=${ASSET_V}"></script>
 </body>
 </html>`;
 }
@@ -457,7 +462,7 @@ function main() {
     if (current && current !== SITE) idx = idx.split(current).join(SITE);
     idx = idx.replace(/https:\/\/example\.com/g, SITE);
     // Версия ассетов для сброса кеша
-    idx = idx.replace(/(href|src)="(styles\.css|ads\.js|ui\.js)(\?v=[^"]*)?"/g, `$1="$2?v=${ASSET_V}"`);
+    idx = idx.replace(/(href|src)="(styles\.css|ads\.js|ui\.js|auth\.js|comments\.js)(\?v=[^"]*)?"/g, `$1="$2?v=${ASSET_V}"`);
     writeFileSync(idxPath, idx, "utf8");
     console.log(`index.html: домен и версия ассетов обновлены (v=${ASSET_V})`);
   }

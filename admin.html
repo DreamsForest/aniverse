@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Админка — AniToki</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="aurora"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+<header class="header glass">
+  <a href="index.html" class="logo"><span class="logo-mark">◢◤</span><span class="logo-text">Ani<span>Toki</span></span></a>
+  <nav class="nav"><a href="index.html" class="nav-link">На сайт</a></nav>
+</header>
+
+<main>
+  <h1 class="section-title">🛡 Модерация</h1>
+  <div id="admin-gate" class="cm-gate">Проверяем доступ…</div>
+  <div id="admin-panel" hidden>
+    <div class="admin-toolbar">
+      <button class="btn btn-ghost" id="reload">Обновить</button>
+      <span class="muted" id="rep-count"></span>
+    </div>
+
+    <h2 class="admin-h2">Жалобы</h2>
+    <div id="reports" class="reports"></div>
+
+    <h2 class="admin-h2">Нарушители <span class="muted" id="viol-count"></span></h2>
+    <div id="violators" class="violators"></div>
+  </div>
+</main>
+
+<footer class="footer"><p>AniToki — панель модерации.</p></footer>
+
+<script src="auth.js"></script>
+<script>
+(function () {
+  "use strict";
+  const A = () => window.AniAuth;
+  const esc = (s) => A().esc(s);
+  const fmt = (ms) => { try { return new Date(ms).toLocaleString("ru-RU"); } catch { return ""; } };
+  const DAYS = [1, 2, 3, 5, 7];
+
+  const gate = document.getElementById("admin-gate");
+  const panel = document.getElementById("admin-panel");
+  const reportsEl = document.getElementById("reports");
+  const violatorsEl = document.getElementById("violators");
+  const repCount = document.getElementById("rep-count");
+  const violCount = document.getElementById("viol-count");
+
+  let tickTimer = null;
+
+  function setView(user) {
+    if (!user) {
+      gate.hidden = false; panel.hidden = true;
+      gate.innerHTML = `Нужен вход администратора. <a href="#" id="al">Войти</a>`;
+      gate.querySelector("#al").onclick = (e) => { e.preventDefault(); A().openModal("login"); };
+      return;
+    }
+    if (user.role !== "admin") {
+      gate.hidden = false; panel.hidden = true;
+      gate.textContent = "Доступ только для администратора.";
+      return;
+    }
+    gate.hidden = true; panel.hidden = false;
+    loadAll();
+  }
+
+  async function loadAll() { await Promise.all([loadReports(), loadViolators()]); }
+
+  /* ---------- общий вызов действия ---------- */
+  async function act(path, opts, okMsg) {
+    const { ok, data } = await A().api(path, opts);
+    A().toast(ok ? okMsg : (data.error || "Ошибка."), ok ? "ok" : "error");
+    return ok;
+  }
+
+  /* ================= ЖАЛОБЫ ================= */
+  async function loadReports() {
+    reportsEl.innerHTML = `<p class="muted">Загрузка…</p>`;
+    const { ok, data } = await A().api("/admin/reports");
+    if (!ok) { reportsEl.innerHTML = `<p class="muted">${esc(data.error || "Ошибка.")}</p>`; return; }
+    const list = data.reports || [];
+    repCount.textContent = list.length ? `Открытых жалоб: ${list.length}` : "Открытых жалоб нет.";
+    reportsEl.innerHTML = list.length ? list.map(reportCard).join("") : `<p class="muted">Чисто! Жалоб нет.</p>`;
+    list.forEach(bindReport);
+  }
+
+  function daysChips() {
+    return `<div class="mod-days" data-days="7">
+      ${DAYS.map((d) => `<button type="button" class="mod-day${d === 7 ? " active" : ""}" data-d="${d}">${d}</button>`).join("")}
+      <span class="mod-days-label">дней</span>
+    </div>`;
+  }
+
+  function reportCard(r) {
+    const subj = r.kind === "comment"
+      ? `<div class="rep-sub">Комментарий пользователя <b>${esc(r.subjectName || "—")}</b>${r.animeId ? ` к тайтлу <code>${esc(r.animeId)}</code>` : ""}:</div>
+         <blockquote class="rep-quote">${r.commentDeleted ? "<i>(удалён)</i>" : esc(r.commentBody || "")}</blockquote>`
+      : `<div class="rep-sub">Жалоба на пользователя <b>${esc(r.subjectName || "—")}</b></div>`;
+    const status = [];
+    if (r.subjectBanned) status.push(`<span class="rep-flag ban">в бане</span>`);
+    if (r.subjectMuted) status.push(`<span class="rep-flag mute">в муте</span>`);
+    return `
+      <div class="rep-card" data-id="${r.id}" data-uid="${r.subjectUserId || ""}" data-cid="${r.commentId || ""}">
+        <div class="rep-top">
+          <span class="rep-kind ${r.kind}">${r.kind === "comment" ? "комментарий" : "пользователь"}</span>
+          ${status.join("")}
+          <span class="rep-time">${fmt(r.createdAt)}</span>
+        </div>
+        ${subj}
+        <div class="rep-meta">Жалоба от <b>${esc(r.reporter)}</b>${r.reason ? `: «${esc(r.reason)}»` : " (без причины)"}</div>
+        <div class="rep-actions">
+          ${r.commentId && !r.commentDeleted ? `<button class="btn btn-ghost sm" data-act="del-comment">Удалить комментарий</button>` : ""}
+          ${r.subjectUserId ? `
+            <span class="rep-mod">
+              ${daysChips()}
+              <button class="btn sm" data-act="mute">Мут</button>
+              <button class="btn sm danger" data-act="ban">Бан</button>
+            </span>` : ""}
+          <button class="btn btn-ghost sm" data-act="resolve">Закрыть жалобу</button>
+        </div>
+      </div>`;
+  }
+
+  function bindDayChips(cardEl) {
+    const wrap = cardEl.querySelector(".mod-days");
+    if (!wrap) return;
+    wrap.querySelectorAll(".mod-day").forEach((b) => {
+      b.onclick = () => {
+        wrap.querySelectorAll(".mod-day").forEach((x) => x.classList.remove("active"));
+        b.classList.add("active");
+        wrap.dataset.days = b.dataset.d;
+      };
+    });
+  }
+
+  function bindReport(r) {
+    const cardEl = reportsEl.querySelector(`.rep-card[data-id="${r.id}"]`);
+    if (!cardEl) return;
+    const uid = Number(cardEl.dataset.uid) || 0;
+    const cid = Number(cardEl.dataset.cid) || 0;
+    bindDayChips(cardEl);
+    const daysWrap = cardEl.querySelector(".mod-days");
+
+    cardEl.querySelectorAll("[data-act]").forEach((btn) => {
+      btn.onclick = async () => {
+        const a = btn.dataset.act;
+        if (a === "resolve") {
+          if (await act("/admin/reports", { method: "POST", body: { reportId: r.id } }, "Жалоба закрыта.")) loadReports();
+        } else if (a === "del-comment" && cid) {
+          if (!confirm("Удалить комментарий?")) return;
+          if (await act(`/comment/${cid}`, { method: "DELETE" }, "Комментарий удалён.")) loadAll();
+        } else if ((a === "ban" || a === "mute") && uid) {
+          const days = Number(daysWrap ? daysWrap.dataset.days : 7) || 7;
+          const reason = prompt(`Причина ${a === "ban" ? "бана" : "мута"} (необязательно):`) || "";
+          const okMod = await act("/admin/moderate", { method: "POST", body: { userId: uid, action: a, days, reason } },
+                                  `${a === "ban" ? "Бан" : "Мут"} на ${days} дн. выдан.`);
+          if (okMod) {
+            // жалоба разобрана → закрываем её и обновляем оба списка
+            await A().api("/admin/reports", { method: "POST", body: { reportId: r.id } });
+            loadAll();
+          }
+        }
+      };
+    });
+  }
+
+  /* ================= НАРУШИТЕЛИ ================= */
+  async function loadViolators() {
+    violatorsEl.innerHTML = `<p class="muted">Загрузка…</p>`;
+    const { ok, data } = await A().api("/admin/violators");
+    if (!ok) { violatorsEl.innerHTML = `<p class="muted">${esc(data.error || "Ошибка.")}</p>`; return; }
+    const list = data.violators || [];
+    violCount.textContent = list.length ? `(${list.length})` : "";
+    violatorsEl.innerHTML = list.length ? list.map(violCard).join("") : `<p class="muted">Список пуст — нарушителей нет.</p>`;
+    list.forEach(bindViol);
+    startTick();
+  }
+
+  function violCard(v) {
+    const tags = [];
+    if (v.banned) tags.push(`<span class="rep-flag ban">бан</span> <span class="viol-timer" data-until="${v.bannedUntil}"></span>`);
+    if (v.muted) tags.push(`<span class="rep-flag mute">мут</span> <span class="viol-timer" data-until="${v.mutedUntil}"></span>`);
+    return `
+      <div class="viol-card" data-uid="${v.id}">
+        <div class="viol-main">
+          <div class="viol-name">${esc(v.username)}</div>
+          <div class="viol-status">${tags.join(' <span class="viol-sep">·</span> ')}</div>
+          ${v.reason ? `<div class="viol-reason">Причина: ${esc(v.reason)}</div>` : ""}
+        </div>
+        <div class="viol-actions">
+          ${v.banned ? `<button class="btn btn-ghost sm" data-act="unban">Разбанить</button>` : ""}
+          ${v.muted ? `<button class="btn btn-ghost sm" data-act="unmute">Размутить</button>` : ""}
+        </div>
+      </div>`;
+  }
+
+  function bindViol(v) {
+    const cardEl = violatorsEl.querySelector(`.viol-card[data-uid="${v.id}"]`);
+    if (!cardEl) return;
+    cardEl.querySelectorAll("[data-act]").forEach((btn) => {
+      btn.onclick = async () => {
+        const a = btn.dataset.act; // unban | unmute
+        const label = a === "unban" ? "Пользователь разбанен." : "Пользователь размучен.";
+        if (await act("/admin/moderate", { method: "POST", body: { userId: v.id, action: a } }, label)) loadViolators();
+      };
+    });
+  }
+
+  /* ---------- живой обратный отсчёт таймеров ---------- */
+  function humanLeft(ms) {
+    if (ms <= 0) return "истёк";
+    const s = Math.floor(ms / 1000);
+    const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600),
+          m = Math.floor((s % 3600) / 60), sec = s % 60;
+    if (d > 0) return `осталось ${d}д ${h}ч ${m}м`;
+    if (h > 0) return `осталось ${h}ч ${m}м ${sec}с`;
+    if (m > 0) return `осталось ${m}м ${sec}с`;
+    return `осталось ${sec}с`;
+  }
+  function tick() {
+    const now = Date.now();
+    const timers = violatorsEl.querySelectorAll(".viol-timer");
+    if (!timers.length) { stopTick(); return; }
+    let expired = false;
+    timers.forEach((t) => {
+      const left = Number(t.dataset.until) - now;
+      t.textContent = humanLeft(left);
+      if (left <= 0) expired = true;
+    });
+    if (expired) loadViolators(); // срок вышел — перечитываем список
+  }
+  function startTick() { stopTick(); tick(); tickTimer = setInterval(tick, 1000); }
+  function stopTick() { if (tickTimer) { clearInterval(tickTimer); tickTimer = null; } }
+
+  document.getElementById("reload").onclick = loadAll;
+  A().onChange(setView);
+})();
+</script>
+</body>
+</html>

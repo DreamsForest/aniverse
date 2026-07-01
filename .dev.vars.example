@@ -1,0 +1,13 @@
+# Пример локальных переменных для `wrangler pages dev`.
+# Скопируй в `.dev.vars` (он в .gitignore — НЕ коммить) и подставь свои значения.
+# В .dev.vars кладутся И обычные переменные, И секреты — только для локального запуска.
+
+SITE_URL=http://localhost:8788
+MAIL_FROM=AniToki <onboarding@resend.dev>
+ADMIN_EMAIL=rowenhousecyqx@outlook.com
+
+# Секрет для инициализации админа (придумай длинную случайную строку):
+ADMIN_SETUP_SECRET=поменяй-меня-на-длинный-случайный-секрет
+
+# Ключ Resend (если пусто — письма не шлются, ссылка печатается в консоль):
+RESEND_API_KEY=

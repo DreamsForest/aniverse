@@ -1,0 +1,33 @@
+# ============================================================
+#  Конфигурация Cloudflare Pages + Functions для AniToki.
+#  Бэкенд: D1 (база) + Pages Functions (API в папке /functions).
+#
+#  Привязку D1 и секреты можно задать и здесь, и в дашборде
+#  (Pages → проект → Settings → Functions / Variables).
+#  Секреты (RESEND_API_KEY, ADMIN_SETUP_SECRET) задавать ТОЛЬКО
+#  как Secret в дашборде или через `wrangler pages secret put` —
+#  НЕ коммитить их в этот файл.
+# ============================================================
+
+name = "aniverse"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "."
+
+# --- База данных D1 ---
+# database_id возьми из вывода `wrangler d1 create aniverse`
+# и вставь сюда (или привяжи базу в дашборде Pages).
+[[d1_databases]]
+binding = "DB"
+database_name = "aniverse"
+database_id = "364363b7-a86c-44bd-8a60-c1a6d53b6292"
+
+# --- Нечувствительные переменные (можно хранить в репозитории) ---
+[vars]
+SITE_URL    = "https://anitoki.ru"
+MAIL_FROM   = "AniToki <noreply@anitoki.ru>"
+ADMIN_EMAIL = "muhinv451@gmail.com"
+
+# --- Секреты (НЕ здесь!) задаются командами:
+#   wrangler pages secret put RESEND_API_KEY
+#   wrangler pages secret put ADMIN_SETUP_SECRET
+# ------------------------------------------------------------

@@ -9,3 +9,10 @@ npm-debug.log*
 # Редакторы
 .vscode/
 .idea/
+
+# Cloudflare / wrangler (локальное состояние и СЕКРЕТЫ — не коммитить!)
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+wrangler.local.toml

@@ -249,7 +249,12 @@ function renderTitle(id) {
         <a class="btn btn-primary" href="#/watch/${a.id}">▶ Смотреть</a>
       </div>
     </section>
+
+    <div id="comments-root" data-anime-id="${escapeAttr(a.id)}"></div>
   `;
+
+  // Подключаем комментарии (виджет из comments.js)
+  if (window.AniComments) window.AniComments.mount(document.getElementById("comments-root"));
 }
 
 async function renderWatch(id) {

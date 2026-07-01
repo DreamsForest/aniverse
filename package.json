@@ -1,0 +1,14 @@
+{
+  "name": "anitoki",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AniToki — каталог аниме + бэкенд на Cloudflare Pages Functions/D1",
+  "scripts": {
+    "dev": "wrangler pages dev .",
+    "db:local": "wrangler d1 execute aniverse --local --file=schema.sql",
+    "db:remote": "wrangler d1 execute aniverse --remote --file=schema.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}
